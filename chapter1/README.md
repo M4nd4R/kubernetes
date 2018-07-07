@@ -185,6 +185,8 @@ f3ed6cb59ab0: Mounted from library/node
 latest: digest: sha256:95bfb737a928a4aa369402668950a571c26fb10ac2df3c7988eab017dcefc1d6 size: 2213
 ```
 
+# KUBERBETES
+
 Install Kubernetes client - kubectl
 
 ```
@@ -211,3 +213,8 @@ Create a project
 $ gcloud init
 ```
 
+Create a 3-node cluster in GCE
+
+```
+# gcloud container clusters create kubia --num-nodes 3 --machine-type f1-micro
+```
