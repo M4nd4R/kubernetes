@@ -125,4 +125,161 @@ kubia-rpzwf           1/1       Running   0          1d
 kubia-vpxz9           1/1       Running   0          1d                          
 ```
 
+Listing pods with label selectors
 
+```
+-> Contains a label with a value
+# kubectl get pods -l creation_method=manual
+NAME                  READY     STATUS    RESTARTS   AGE
+kubia-manual          1/1       Running   0          11h
+kubia-manual-labels   1/1       Running   0          10h
+
+-> Containers a label
+# kubectl get pods -l env
+NAME                  READY     STATUS    RESTARTS   AGE
+kubia-manual-labels   1/1       Running   0          10h
+
+-> Does not contain a label
+# kubectl get pods -l '!env'
+
+-> Multiple labels
+# kubectl get pods -l creation_method=manual,env=debug
+```
+
+### Introducing Namespaces
+
+List namespaces
+
+```
+# kubectl get ns
+```
+
+Lising pods from a namespace
+
+```
+# kubectl get namespaces
+NAME          STATUS    AGE
+default       Active    2d
+kube-public   Active    2d
+kube-system   Active    2d
+
+# kubectl get pods --namespace kube-system
+
+OR
+
+# kubectl get pods -n kube-system
+NAME                                              READY     STATUS    RESTARTS   AGE
+event-exporter-v0.1.9-5c8fb98cdb-d4x2d            2/2       Running   0          2d
+fluentd-gcp-v2.0.17-7cs8p                         2/2       Running   0          2d
+```
+
+Creating a namespace using YAML
+
+```
+# cat custom-namespace-yaml.yaml 
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: custom-namespace-yaml
+
+# kubectl create -f custom-namespace-yaml.yaml 
+namespace "custom-namespace-yaml" created
+
+# kubectl get ns
+NAME                    STATUS    AGE
+custom-namespace-yaml   Active    7s
+default                 Active    2d
+kube-public             Active    2d
+kube-system             Active    2d
+```
+
+Creating a namespace w/o YAML
+
+```
+# kubectl create namespace <ns-name>
+```
+```
+# kubectl create namespace custom-namespace-nonyaml
+namespace "custom-namespace-nonyaml" created
+```
+
+Creating pods in the namespace - using YAML
+
+```
+# cat kubia-manual-yaml.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-manual
+  namespace: custom-namespace-yaml
+spec:
+  containers:
+  - image: m4nd4r/kubia
+    name: kubia
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+
+# kubectl create -f kubia-manual-yaml.yaml 
+pod "kubia-manual" created
+
+# kubectl get pods -n custom-namespace-yaml
+NAME           READY     STATUS    RESTARTS   AGE
+kubia-manual   1/1       Running   0          14s
+```
+
+Creating pods in namespace - w/o YAML
+
+```
+# kubectl create -f kubia-manual.yaml -n custom-namespace-nonyaml
+pod "kubia-manual" created
+
+# kubectl get pods -n custom-namespace-nonyaml
+NAME           READY     STATUS    RESTARTS   AGE
+kubia-manual   1/1       Running   0          14s
+```
+
+### Deleting Pods
+
+Deleting pods by name
+
+```
+# kubectl delete pods kubia-manual-labels
+pod "kubia-manual-labels" deleted
+```
+
+Deleting multiple pods
+
+```
+# kubectl delete po <pod1> <pod2> ...
+```
+
+Deleting pods with label selector
+
+```
+# kubectl delete pods -l creation_method=manual
+pod "kubia-manual" deleted
+```
+
+Deleting pods by deleting whole namespace
+
+```
+# kubectl delete ns custom-namespace-yaml
+namespace "custom-namespace-yaml" deleted
+```
+
+Delete all pods in current namespace
+
+```
+-> This doesn't delete pods created by ReplicationControllers. You need to delete RCs for that
+# kubectl delete pods --all
+```
+
+Delete all resources in current namespace (pods, services, RCs, etc.)
+
+```
+# kubectl delete all --all
+
+all : all types of resources
+--all : all instances
+```
